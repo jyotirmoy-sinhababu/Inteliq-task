@@ -39,7 +39,7 @@ const suggestionCards = [
 
 const MainScreen = () => {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <Box
         sx={{
@@ -56,7 +56,7 @@ const MainScreen = () => {
           <Select
             value='ChatGPT 4'
             sx={{
-              minWidth: 120,
+              minWidth: 40,
               '& .MuiOutlinedInput-notchedOutline': {
                 border: 'none',
               },

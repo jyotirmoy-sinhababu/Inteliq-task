@@ -12,26 +12,43 @@ import {
 } from '@mui/icons-material';
 
 import { GoogleGenAI } from '@google/genai';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useChat } from '../context/DataContext';
 
 const ChatArea = () => {
-  // useEffect(() => {
-  //   main();
-  // }, []);
+  const { addMessage } = useChat();
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   const ai = new GoogleGenAI({
     apiKey: KEY,
   });
 
-  async function main() {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: 'Explain how AI works in a few words',
-    });
+  async function main(): Promise<void> {
+    if (!input.trim()) return;
+    addMessage('user', input);
+    setLoading(true);
 
-    console.log(response.text);
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: input,
+      });
+      const reply = response?.text;
+      if (reply) {
+        addMessage('assistant', reply);
+      } else {
+        addMessage('assistant', '⚠️ No response from AI.');
+      }
+    } catch (error) {
+      console.error(error);
+      addMessage('assistant', '⚠️ Something went wrong.');
+    }
+    setLoading(false);
+    setInput('');
   }
+
   return (
     <Box sx={{ p: 3, bgcolor: 'background.paper' }}>
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
@@ -40,6 +57,9 @@ const ChatArea = () => {
           placeholder='Ask me a question...'
           multiline
           maxRows={4}
+          onChange={(e) => {
+            setInput(e.target.value);
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position='start'>
@@ -56,8 +76,13 @@ const ChatArea = () => {
                 >
                   0/2000
                 </Typography>
-                <IconButton size='small' color='primary'>
-                  <SendIcon />
+                <IconButton
+                  disabled={loading}
+                  onClick={main}
+                  size='small'
+                  color='primary'
+                >
+                  {loading ? '...' : <SendIcon />}
                 </IconButton>
               </InputAdornment>
             ),

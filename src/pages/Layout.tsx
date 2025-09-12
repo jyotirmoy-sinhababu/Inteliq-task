@@ -223,7 +223,6 @@ export default function Layout() {
         </Box>
       </Drawer>
       <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
         {/* <AppBar position='fixed' open={open}>
           <Toolbar>
           
