@@ -1,13 +1,15 @@
 import './App.css';
-import ChatArea from './pages/ChatArea';
+// import MainScreen from './pages/MainScreen';
+// import ChatArea from './pages/ChatArea';
 // import Sidebar from './components/Sidebar';
-// import Layout from './pages/Layout';
+import Layout from './pages/Layout';
 function App() {
   return (
     <>
       {/* <Sidebar /> */}
-      {/* <Layout /> */}
-      <ChatArea />
+      <Layout />
+      {/* <ChatArea /> */}
+      {/* <MainScreen /> */}
     </>
   );
 }
