@@ -13,11 +13,11 @@ import {
 
 import { GoogleGenAI } from '@google/genai';
 import { useState } from 'react';
-import { useChat } from '../context/DataContext';
+import { useDataContext } from '../context/DataContext';
 
 const ChatArea = () => {
-  const { addMessage } = useChat();
-  const [input, setInput] = useState('');
+  const { currentConversation, setCurrentConversation, saveConversation } =
+    useDataContext();
   const [loading, setLoading] = useState(false);
   const KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -26,27 +26,33 @@ const ChatArea = () => {
   });
 
   async function main(): Promise<void> {
-    if (!input.trim()) return;
-    addMessage('user', input);
+    if (!currentConversation.user.trim()) return;
     setLoading(true);
 
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: input,
+        contents: currentConversation.user,
       });
       const reply = response?.text;
+      saveConversation();
       if (reply) {
-        addMessage('assistant', reply);
+        setCurrentConversation({ ...currentConversation, ai: reply });
+        console.log(reply);
       } else {
-        addMessage('assistant', '⚠️ No response from AI.');
+        setCurrentConversation({
+          ...currentConversation,
+          ai: 'Something went wrong',
+        });
       }
     } catch (error) {
       console.error(error);
-      addMessage('assistant', '⚠️ Something went wrong.');
+      setCurrentConversation({
+        ...currentConversation,
+        ai: 'Something went wrong',
+      });
     }
     setLoading(false);
-    setInput('');
   }
 
   return (
@@ -58,7 +64,10 @@ const ChatArea = () => {
           multiline
           maxRows={4}
           onChange={(e) => {
-            setInput(e.target.value);
+            setCurrentConversation({
+              ...currentConversation,
+              user: e.target.value,
+            });
           }}
           InputProps={{
             startAdornment: (

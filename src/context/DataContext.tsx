@@ -1,46 +1,64 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
-type Message = {
+// Define the type
+type CurrentConversation = {
   id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
+  user: string;
+  ai: string;
 };
 
-type ChatContextType = {
-  inputMessage: Message[];
-  addMessage: (role: 'user' | 'assistant', content: string) => void;
+// Context type (optional, but recommended for clarity)
+type DataContextType = {
+  chatHistory: CurrentConversation[];
+  currentConversation: CurrentConversation;
+  setChatHistory: React.Dispatch<React.SetStateAction<CurrentConversation[]>>;
+  setCurrentConversation: React.Dispatch<
+    React.SetStateAction<CurrentConversation>
+  >;
+  saveConversation: () => void;
 };
 
-const chatContext = createContext<ChatContextType | undefined>(undefined);
+// Create the context
+const ChatContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataContext = ({ children }: { children: React.ReactNode }) => {
-  const [inputMessage, setInputMessage] = useState<Message[]>([]);
+  const [chatHistory, setChatHistory] = useState<CurrentConversation[]>([]);
+  const [currentConversation, setCurrentConversation] =
+    useState<CurrentConversation>({
+      id: crypto.randomUUID(), // ✅ call it
+      user: '',
+      ai: '',
+    });
 
-  const addMessage = (role: 'user' | 'assistant', content: string) => {
-    setInputMessage((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role,
-        content,
-        timestamp: Date.now(),
-      },
-    ]);
+  const saveConversation = () => {
+    if (!currentConversation.user && !currentConversation.ai) return; // ignore empty
+    setChatHistory((prev) => [...prev, currentConversation]);
+    setCurrentConversation({
+      id: crypto.randomUUID(),
+      user: '',
+      ai: '',
+    });
   };
+
   return (
-    <chatContext.Provider value={{ inputMessage, addMessage }}>
+    <ChatContext.Provider
+      value={{
+        chatHistory,
+        setChatHistory,
+        currentConversation,
+        setCurrentConversation,
+        saveConversation,
+      }}
+    >
       {children}
-    </chatContext.Provider>
+    </ChatContext.Provider>
   );
 };
 
-export function useChat() {
-  const context = useContext(chatContext);
-  if (!context) {
-    throw new Error('useChat must be used within a ChatProvider');
-  }
+// Custom hook
+export const useDataContext = () => {
+  const context = useContext(ChatContext);
+  if (!context)
+    throw new Error('useDataContext must be used inside DataProvider');
   return context;
-}
-
-export default DataContext;
+};

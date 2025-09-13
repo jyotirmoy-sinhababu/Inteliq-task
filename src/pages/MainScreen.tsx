@@ -1,8 +1,7 @@
+// src/components/MainScreen.tsx
 import {
   Box,
   Typography,
-  TextField,
-  InputAdornment,
   IconButton,
   Card,
   CardContent,
@@ -15,18 +14,15 @@ import {
 import {
   Share as ShareIcon,
   Add as AddIcon,
-  AttachFile as AttachIcon,
-  Send as SendIcon,
   Help as HelpIcon,
   AutoAwesome as SparkleIcon,
 } from '@mui/icons-material';
+
 import ChatArea from './ChatArea';
+import { useDataContext } from '../context/DataContext';
 
 const suggestionCards = [
-  {
-    icon: '✨',
-    title: 'Give me a concise summary of this meeting transcript',
-  },
+  { icon: '✨', title: 'Give me a concise summary of this meeting transcript' },
   {
     icon: '✨',
     title: 'Write a product description for a minimalist smartwatch',
@@ -38,8 +34,17 @@ const suggestionCards = [
 ];
 
 const MainScreen = () => {
+  const { currentConversation, setCurrentConversation, chatHistory } =
+    useDataContext();
+  const createChat = () => {
+    setCurrentConversation({
+      id: crypto.randomUUID(),
+      user: '',
+      ai: '',
+    });
+  };
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Header */}
       <Box
         sx={{
@@ -57,9 +62,7 @@ const MainScreen = () => {
             value='ChatGPT 4'
             sx={{
               minWidth: 40,
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: 'none',
-              },
+              '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
             }}
           >
             <MenuItem value='ChatGPT 4'>ChatGPT 4</MenuItem>
@@ -77,6 +80,7 @@ const MainScreen = () => {
             variant='contained'
             startIcon={<AddIcon />}
             size='small'
+            onClick={() => createChat()}
             sx={{
               borderRadius: '20px',
               textTransform: 'none',
@@ -89,108 +93,88 @@ const MainScreen = () => {
       </Box>
 
       {/* Main Content */}
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 4,
-          maxWidth: 800,
-          mx: 'auto',
-          width: '100%',
-        }}
-      >
-        {/* Greeting */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography
-            variant='h4'
-            sx={{
-              mb: 2,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-            }}
-          >
-            <span>👋</span> Hi Laurence!
+      {chatHistory.length > 0 ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <Typography sx={{ fontFamily: 'serif', fontWeight: 300, mt: '3%' }}>
+            <strong style={{ color: '#1565C0' }}> user:</strong>
+            {currentConversation.user}
           </Typography>
-          <Typography
-            variant='h4'
-            sx={{ color: 'text.primary', fontWeight: 600 }}
-          >
-            What do you want to learn today?
+          <Typography sx={{ fontFamily: 'serif', fontWeight: 300, mt: '1%' }}>
+            <strong style={{ color: '#1565C0' }}>Assistant:</strong>
+            {currentConversation.ai}
           </Typography>
         </Box>
-
-        {/* Suggestion Cards */}
+      ) : (
         <Box
           sx={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: 2,
             width: '100%',
-            mb: 6,
+            mb: '7%',
+            mt: '1%',
           }}
         >
-          {suggestionCards.map((card, index) => (
-            <Card
-              key={index}
-              sx={{
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                },
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    mb: 2,
-                  }}
-                >
-                  <SparkleIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+          {suggestionCards?.map((item: any, index) => {
+            return (
+              <Card
+                key={index}
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
                   <Box
                     sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      bgcolor: 'background.default',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
+                      justifyContent: 'space-between',
+                      mb: 2,
                     }}
                   >
-                    <SparkleIcon
-                      sx={{ fontSize: 12, color: 'text.secondary' }}
-                    />
+                    <SparkleIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                    <Box
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        bgcolor: 'background.default',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <SparkleIcon
+                        sx={{ fontSize: 12, color: 'text.secondary' }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-                <Typography
-                  variant='body1'
-                  sx={{
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    color: 'text.primary',
-                  }}
-                >
-                  {card.title}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
+                  <Typography
+                    variant='body1'
+                    sx={{
+                      fontWeight: 500,
+                      lineHeight: 1.4,
+                      color: 'text.primary',
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
-      </Box>
+      )}
 
       {/* Input Area */}
-      <ChatArea />
+      <Box sx={{ mt: '21%' }}>
+        <ChatArea />
+      </Box>
     </Box>
   );
 };
